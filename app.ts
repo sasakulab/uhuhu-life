@@ -1,7 +1,26 @@
 import express from 'express'
+import { Client } from 'pg'
+
 const app: express.Express = express()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
+const client: any = new Client({
+    user: "postgres",
+    host: "127.0.0.1",
+    database: "uhuhu",
+    password: "postgres",
+    port: 5432,
+})
+
+client.connect();
+
+client
+  .query('select now()')
+  .then((res: any) => console.log(res.rows))
+  .catch((err: any) => console.error('connection error', err.stack))
+  .then(() => client.end())
+  .then(() => console.log('disconnected'));
 
 // Avoid CORS in development status
 app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
