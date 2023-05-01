@@ -7,20 +7,13 @@ app.use(express.urlencoded({ extended: true }))
 
 const client: any = new Client({
     user: "postgres",
-    host: "127.0.0.1",
-    database: "uhuhu",
+    host: "localhost",
+    database: "postgres",
     password: "postgres",
     port: 5432,
 })
 
 client.connect();
-
-client
-  .query('select now()')
-  .then((res: any) => console.log(res.rows))
-  .catch((err: any) => console.error('connection error', err.stack))
-  .then(() => client.end())
-  .then(() => console.log('disconnected'));
 
 // Avoid CORS in development status
 app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -61,12 +54,20 @@ const users: User[] = [
     {userId: 1, name: "name1", mail: "admin@sasakulab.com", isAdmin: true}
 ]
 
-app.get('/', (req: express.Request, res: express.Response) => {
-    res.send("Hi")
-})
-
 app.get('/items', (req: express.Request, res: express.Response) => {
-    res.send(items)
+    client
+        .query('select * from public.items;')
+        .then((qres: any) => res.send(qres.rows))
 })
 
+app.get('/items/:id', (req: express.Request, res: express.Response) => {
+    client
+        .query(`select * from public.items where itemid = ${req.params.id}`)
+        .then((qres: any) => res.send(qres.rows))
+})
 
+app.get('/time', (req: express.Request, res: express.Response) => {
+    client
+        .query('select now();')
+        .then((qres: any) => res.send(qres.rows))   
+})
